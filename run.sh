@@ -1,1 +1,1 @@
-g++ -Wall -Wextra -O2 -std=c++17 -lm *.cc
+g++ -Wall -Wextra -O2 -std=c++20 -lm *.cc

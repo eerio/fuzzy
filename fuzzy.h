@@ -9,10 +9,14 @@ class TriFuzzyNum {
     real_t u;
 
 public:
-    TriFuzzyNum(real_t a, real_t b, real_t c);
-    real_t lower_value();
-    real_t modal_value();
-    real_t upper_value();
+    constexpr TriFuzzyNum(real_t a, real_t b, real_t c);
+    constexpr real_t lower_value();
+    constexpr real_t modal_value();
+    constexpr real_t upper_value();
+
+    bool operator==(TriFuzzyNum other);
+    TriFuzzyNum operator+(TriFuzzyNum other);
+    TriFuzzyNum operator-(TriFuzzyNum other);
 
 }
 
