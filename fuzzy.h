@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cmath>
-
+// TODO inline dla stałej, sortowanie przy mnożeniu.
 using real_t = double;
 using std::ostream;
 
@@ -48,27 +48,25 @@ public:
         real_t new_l = this->l * that.l;
         real_t new_m = this->m * that.m;
         real_t new_u = this->u * that.u;
-        return TriFuzzyNum(new_l, new_m, new_u);
+
+        real_t values[] = {new_l, new_m, new_u};
+        std::sort(std::begin(values), std::end(values));
+
+        return TriFuzzyNum(values[0], values[1], values[2]);
     }
 
-    TriFuzzyNum operator+=(const TriFuzzyNum &that) {
-        this->l += that.l;
-        this->m += that.m;
-        this->u += that.u;
+    constexpr TriFuzzyNum operator+=(const TriFuzzyNum &that) {
+        *this = *this + that;
         return *this;
     }
 
-    TriFuzzyNum operator-=(const TriFuzzyNum &that) {
-        this->l -= that.u;
-        this->m -= that.m;
-        this->u -= that.l;
+    constexpr TriFuzzyNum operator-=(const TriFuzzyNum &that) {
+        *this = *this - that;
         return *this;
     }
 
-    TriFuzzyNum operator*=(const TriFuzzyNum &that) {
-        this->l *= that.l;
-        this->m *= that.m;
-        this->u *= that.u;
+    constexpr TriFuzzyNum operator*=(const TriFuzzyNum &that) {
+        *this = *this * that;
         return *this;
     }
 
