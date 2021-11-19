@@ -1,15 +1,22 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
+#include <algorithm>
 #include <iostream>
 #include <cmath>
+#include <tuple>
+#include <numeric>
+#include <set>
+
 // TODO inline dla stałej, sortowanie przy mnożeniu.
 using real_t = double;
 using std::ostream;
 
 class TriFuzzyNum {
+    real_t l, m, u;
+
 public:
-    constexpr TriFuzzyNum(const real_t &a, const real_t &b, const real_t &c) {
+    constexpr TriFuzzyNum(real_t a, real_t b, real_t c) {
         real_t values[] = {a, b, c};
         std::sort(std::begin(values), std::end(values));
 
@@ -18,17 +25,14 @@ public:
         this->u = values[2];
     }
 
-    constexpr real_t lower_value() const {
-        return this->l;
-    }
+    constexpr TriFuzzyNum(const TriFuzzyNum& t) = default;
+    constexpr TriFuzzyNum(TriFuzzyNum&& t) = default;
 
-    constexpr real_t modal_value() const {
-        return this->m;
-    }
+    constexpr TriFuzzyNum& operator=(TriFuzzyNum&& t) = default;
 
-    constexpr real_t upper_value() const {
-        return this->u;
-    }
+    constexpr real_t lower_value() const { return this->l; }
+    constexpr real_t modal_value() const { return this->m; }
+    constexpr real_t upper_value() const { return this->u; }
 
     constexpr TriFuzzyNum operator+(const TriFuzzyNum &that) const {
         real_t new_l = this->l + that.l;
@@ -48,11 +52,11 @@ public:
         real_t new_l = this->l * that.l;
         real_t new_m = this->m * that.m;
         real_t new_u = this->u * that.u;
+        return TriFuzzyNum(new_l, new_m, new_u);
+    }
 
-        real_t values[] = {new_l, new_m, new_u};
-        std::sort(std::begin(values), std::end(values));
-
-        return TriFuzzyNum(values[0], values[1], values[2]);
+    constexpr TriFuzzyNum operator/(unsigned int d) const {
+        return TriFuzzyNum(this->l / d, this->m / d, this->u / d);
     }
 
     constexpr TriFuzzyNum operator+=(const TriFuzzyNum &that) {
@@ -70,54 +74,58 @@ public:
         return *this;
     }
 
-    constexpr int operator<=>(const TriFuzzyNum &that) const {
-        real_t z1 = this->u - this->l + sqrt(1 + (this->u - this->m) *
-                (this->u - this->m)) + sqrt(1 + (this->m - this->l) * (this->m - this->l));
-        real_t y1 = (this->u - this->l) / z1;
-        real_t x1 = ((this->u - this->l) * this->m + sqrt(1 + (this->u - this->m) * (this->u - this->m))
-                * this->l + sqrt(1 + (this->m - this->l) *(this->m - this->l)) * this->u) / z1;
-
-        real_t z2 = that.u - that.l + sqrt(1 + (that.u - that.m) *
-                (that.u - that.m)) + sqrt(1 + (that.m - that.l) * (that.m - that.l));
-        real_t y2 = (that.u - that.l) / z2;
-        real_t x2 = ((that.u - that.l) * that.m + sqrt(1 + (that.u - that.m) * (that.u - that.m))
-                * that.l + sqrt(1 + (that.m - that.l) *(that.m - that.l)) * that.u) / z2;
-
-        real_t first1 = (x1 - y1) / 2;
-        real_t first2 =(x2 - y2) / 2;
-        real_t second1 = 1 - y1;
-        real_t second2 = 1 - y2;
-        real_t third1 = this->m;
-        real_t third2 = that.m;
-
-        if (first1 > first2) return 1;
-        else if (first1 < first2) return -1;
-        else {
-            if (second1 > second2) return 1;
-            else if (second1 < second2) return -1;
-            else {
-                if (third1 > third2) return 1;
-                else if (third1 < third2) return -1;
-                else return 0;
-            }
-        }
+    std::tuple<real_t, real_t, real_t> rank() const {
+        real_t z = (u - l) + sqrt(1 + (u - m) * (u - m)) + sqrt(1 + (m - l) * (m - l));
+        real_t x = ((u - l) * m + sqrt(1 + (u - m) * (u - m)) * l + sqrt(1 + (m - l) * (m - l)) * u) / z;
+        real_t y = (u - l) / z;
+        return std::make_tuple(x - y / 2, 1 - y, m);
     }
 
-    constexpr bool operator==(const TriFuzzyNum &that) const {
-        return (this->l == that.l && this->m == that.m && this->u == that.u);
+    auto operator<=>(const TriFuzzyNum &other) const {
+        auto my_rank = this->rank();
+        auto other_rank = other.rank();
+        return my_rank <=> other_rank;
     }
 
-    constexpr bool operator!=(const TriFuzzyNum &that) const {
-        return (this->l != that.l || this->m != that.m || this->u != that.u);
+    constexpr bool operator==(const TriFuzzyNum &other) const = default;
+
+    friend std::ostream& operator<<(std::ostream& stream, const TriFuzzyNum& num) {
+        stream
+            << '('
+            << num.l << ", "
+            << num.m << ", "
+            << num.u << ')';
+        return stream;
     }
-
-    /*constexpr TriFuzzyNum crisp_number(real_t v) {
-        return TriFuzzyNum(v, v, v);
-    }*/
-
-private:
-    real_t l, m, u;
-    friend std::ostream& operator<<(std::ostream&, const TriFuzzyNum&);
 };
+
+class TriFuzzyNumSet {
+    std::multiset<TriFuzzyNum> nums;
+
+public:
+    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> init): nums(init) {};
+
+    TriFuzzyNumSet(const TriFuzzyNumSet& num) = default;
+    TriFuzzyNumSet(TriFuzzyNumSet&& num) = default;
+
+    TriFuzzyNumSet& operator=(TriFuzzyNumSet&& num) = default;
+    TriFuzzyNumSet& operator=(const TriFuzzyNumSet& num) = default;
+
+    void insert(const TriFuzzyNum& num) { nums.insert(num); }
+    void insert(TriFuzzyNum&& num) { nums.insert(num); }
+
+    void remove(const TriFuzzyNum& num) { nums.erase(num); }
+
+    TriFuzzyNum arithmetic_mean() {
+        if (nums.empty()) throw std::length_error("TriFuzzyNumSet::arithmetic_mean - the set is empty.");
+        return std::accumulate(nums.begin(), nums.end(), TriFuzzyNum {0, 0, 0}) / nums.size();
+    }
+};
+
+constexpr TriFuzzyNum crisp_number(real_t v) {
+    return TriFuzzyNum(v, v, v);
+}
+
+constexpr TriFuzzyNum crisp_zero = crisp_number(0);
 
 #endif //FUZZY_H
