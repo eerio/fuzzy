@@ -103,6 +103,7 @@ class TriFuzzyNumSet {
     std::multiset<TriFuzzyNum> nums;
 
 public:
+    TriFuzzyNumSet() = default;
     TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> init): nums(init) {};
 
     TriFuzzyNumSet(const TriFuzzyNumSet& num) = default;
