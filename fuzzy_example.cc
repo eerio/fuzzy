@@ -14,6 +14,7 @@ int main() {
     cout << num2 << endl;  // (0.25, 0.5, 0.75)
     cout << num3 << endl;  // (1, 1, 1)
 
+    // cout << num1 - num2 << endl;
     assert(num1 + num2 == TriFuzzyNum(1.25, 2.5, 3.75));
     assert(num1 - num2 == TriFuzzyNum(0.25, 1.5, 2.75));
     assert(num1 * num2 == TriFuzzyNum(0.25, 1, 2.25));
