@@ -151,10 +151,10 @@ public:
     }
 };
 
-constexpr TriFuzzyNum crisp_number(real_t v) {
+consteval TriFuzzyNum crisp_number(real_t v) {
     return TriFuzzyNum(v, v, v);
 }
 
-constexpr TriFuzzyNum crisp_zero = crisp_number(0);
+inline constinit const TriFuzzyNum crisp_zero = crisp_number(0);
 
 #endif //FUZZY_H
