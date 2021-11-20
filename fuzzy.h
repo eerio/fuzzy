@@ -141,7 +141,7 @@ public:
 };
 
 consteval TriFuzzyNum crisp_number(real_t v) {
-    return TriFuzzyNum(v, v, v);
+    return {v, v, v};
 }
 
 inline constinit const TriFuzzyNum crisp_zero = crisp_number(0);
