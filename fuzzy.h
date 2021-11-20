@@ -9,18 +9,12 @@
 #include <numeric>
 #include <set>
 
-
-// TODO - wasza funkcja crisp_number może być wykonywana 
-// w czasie wykonania programu, stała crisp_zero może nie zostać 
-// zainicjalizowana w czasie kompilacji
-
-// TODO inline dla stałej, sortowanie przy mnożeniu.
 using real_t = double;
-using std::ostream;
-using rank_t = std::tuple<real_t, real_t, real_t>;
 
 class TriFuzzyNum {
     real_t l, m, u;
+
+    using rank_t = std::tuple<real_t, real_t, real_t>;
 
      [[nodiscard]] rank_t rank() const {
         real_t z = (u - l) + sqrt(1 + (u - m) * (u - m)) + sqrt(1 + (m - l) * (m - l));
@@ -78,7 +72,6 @@ public:
         u += that.u;
         m += that.m;
         l += that.l;
-        normalize();
         return *this;
     }
 
@@ -86,7 +79,6 @@ public:
         l -= that.u;
         m -= that.m;
         u -= that.l;
-        normalize();
         return *this;
     }
 
@@ -99,9 +91,7 @@ public:
     }
 
     auto operator<=>(const TriFuzzyNum &other) const {
-        auto my_rank = this->rank();
-        auto other_rank = other.rank();
-        return my_rank <=> other_rank;
+        return this->rank() <=> other.rank();
     }
 
     constexpr bool operator==(const TriFuzzyNum &other) const = default;
@@ -121,7 +111,6 @@ class TriFuzzyNumSet {
 
 public:
     TriFuzzyNumSet() = default;
-    // constexpr TriFuzzyNumSet(real_t crisp): nums({crisp}) {};
     TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> init): nums(init) {};
 
     TriFuzzyNumSet(const TriFuzzyNumSet& num) = default;
@@ -134,6 +123,7 @@ public:
     void insert(TriFuzzyNum&& num) { nums.insert(num); }
 
     void remove(const TriFuzzyNum& num) { nums.erase(num); }
+    void remove(TriFuzzyNum&& num) { nums.erase(num); }
 
     TriFuzzyNum arithmetic_mean() const {
         if (nums.empty()) throw std::length_error(
