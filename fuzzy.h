@@ -17,13 +17,12 @@
 // TODO inline dla stałej, sortowanie przy mnożeniu.
 using real_t = double;
 using std::ostream;
-
-class TriFuzzyNum;
+using rank_t = std::tuple<real_t, real_t, real_t>;
 
 class TriFuzzyNum {
     real_t l, m, u;
 
-    std::tuple<real_t, real_t, real_t> rank() const {
+     [[nodiscard]] rank_t rank() const {
         real_t z = (u - l) + sqrt(1 + (u - m) * (u - m)) + sqrt(1 + (m - l) * (m - l));
         real_t x = ((u - l) * m + sqrt(1 + (u - m) * (u - m)) * l + sqrt(1 + (m - l) * (m - l)) * u) / z;
         real_t y = (u - l) / z;
@@ -49,30 +48,30 @@ public:
 
     constexpr TriFuzzyNum& operator=(TriFuzzyNum&& t) = default;
 
-    constexpr real_t lower_value() const { return l; }
-    constexpr real_t modal_value() const { return m; }
-    constexpr real_t upper_value() const { return u; }
+    [[nodiscard]] constexpr real_t lower_value() const { return l; }
+    [[nodiscard]] constexpr real_t modal_value() const { return m; }
+    [[nodiscard]] constexpr real_t upper_value() const { return u; }
 
     constexpr TriFuzzyNum operator+(const TriFuzzyNum &that) const {
-        TriFuzzyNum res = TriFuzzyNum(*this);
+        auto res = TriFuzzyNum(*this);
         res += that;
         return res;
     }
 
     constexpr TriFuzzyNum operator-(const TriFuzzyNum &that) const {
-        TriFuzzyNum res = TriFuzzyNum(*this);
+        auto res = TriFuzzyNum(*this);
         res -= that;
         return res;
     }
 
     constexpr TriFuzzyNum operator*(const TriFuzzyNum &that) const {
-        TriFuzzyNum res = TriFuzzyNum(*this);
+        auto res = TriFuzzyNum(*this);
         res *= that;
         return res;
     }
 
     constexpr TriFuzzyNum operator/(unsigned int d) const {
-        return TriFuzzyNum(l / d, m / d, u / d);
+        return {l / d, m / d, u / d};
     }
 
     constexpr TriFuzzyNum& operator+=(const TriFuzzyNum &that) {
